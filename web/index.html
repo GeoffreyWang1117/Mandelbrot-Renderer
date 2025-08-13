@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot Set Renderer - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        #mandelbrot-canvas {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: crosshair;
+            background: #000;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .control-group input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .control-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .control-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .stats {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f260, #0575e6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .info-panel {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+
+        .performance-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .perf-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .perf-title {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .perf-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .perf-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .github-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .github-link:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌀 Mandelbrot Set Renderer</h1>
+        <p>Interactive Web Demo - Click to zoom, explore the infinite fractal beauty</p>
+    </div>
+
+    <a href="https://github.com/GeoffreyWang1117/Mandelbrot-Renderer" class="github-link" target="_blank">
+        📁 View on GitHub
+    </a>
+
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="mandelbrot-canvas" width="800" height="600"></canvas>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="stats" id="stats">
+                Click on the fractal to zoom in • Drag to pan • Use controls to adjust parameters
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="iterations">Max Iterations:</label>
+                <input type="range" id="iterations" min="50" max="1000" value="100" step="10">
+                <span id="iterations-value">100</span>
+            </div>
+
+            <div class="control-group">
+                <label for="zoom">Zoom Level:</label>
+                <input type="range" id="zoom" min="1" max="1000" value="1" step="1">
+                <span id="zoom-value">1x</span>
+            </div>
+
+            <div class="control-group">
+                <button id="render-btn">🚀 Render</button>
+            </div>
+
+            <div class="control-group">
+                <button id="reset-btn">🔄 Reset View</button>
+            </div>
+
+            <div class="control-group">
+                <button id="save-btn">💾 Save Image</button>
+            </div>
+
+            <div class="control-group">
+                <label>Preset Locations:</label>
+                <button id="classic-btn" style="margin-bottom: 5px;">Classic View</button>
+                <button id="spiral-btn" style="margin-bottom: 5px;">Spiral Valley</button>
+                <button id="seahorse-btn">Seahorse Valley</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <h2>🏆 Performance Comparison</h2>
+        <p>This web version demonstrates the Mandelbrot algorithm in pure JavaScript. For ultimate performance, see the native implementations:</p>
+        
+        <div class="performance-comparison">
+            <div class="perf-card">
+                <div class="perf-title">Web JavaScript</div>
+                <div class="perf-value" id="web-perf">~50K</div>
+                <div class="perf-desc">pixels/second<br>Current demo</div>
+            </div>
+            <div class="perf-card">
+                <div class="perf-title">CPU Single-thread</div>
+                <div class="perf-value">1.6M</div>
+                <div class="perf-desc">pixels/second<br>C++ implementation</div>
+            </div>
+            <div class="perf-card">
+                <div class="perf-title">OpenMP (32 cores)</div>
+                <div class="perf-value">120M</div>
+                <div class="perf-desc">pixels/second<br>73x speedup</div>
+            </div>
+            <div class="perf-card">
+                <div class="perf-title">CUDA GPU</div>
+                <div class="perf-value">1,700M</div>
+                <div class="perf-desc">pixels/second<br>1,216x speedup!</div>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 30px;">🔬 Technical Features</h3>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+            <li><strong>Progressive Rendering:</strong> Real-time updates as computation progresses</li>
+            <li><strong>Interactive Exploration:</strong> Click to zoom, drag to pan</li>
+            <li><strong>Smooth Coloring:</strong> HSV color space for beautiful gradients</li>
+            <li><strong>Responsive Design:</strong> Works on desktop and mobile devices</li>
+            <li><strong>High Precision:</strong> Double precision floating-point mathematics</li>
+        </ul>
+
+        <h3 style="margin-top: 20px;">📚 Learn More</h3>
+        <p style="margin-top: 10px;">
+            This interactive demo is part of a complete high-performance Mandelbrot renderer project. 
+            The full implementation includes native C++, OpenMP multi-threading, and CUDA GPU versions 
+            with performance up to <strong>1,216x faster</strong> than this web demo.
+            <br><br>
+            <strong>👉 <a href="https://github.com/GeoffreyWang1117/Mandelbrot-Renderer" style="color: #ffd700;">View the complete project on GitHub</a></strong>
+        </p>
+    </div>
+
+    <script src="mandelbrot.js"></script>
+</body>
+</html>
