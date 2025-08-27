@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandelbrot Set Renderer - Interactive Demo</title>
-    <!-- Last updated: August 13, 2025 - Fix domain issue -->
+    <title>Multi-Fractal Renderer - Interactive Demo</title>
+    <!-- Last updated: August 13, 2025 - Added Julia Set support -->
     <style>
         * {
             margin: 0;
@@ -26,7 +26,7 @@
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
@@ -200,8 +200,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>🌀 Mandelbrot Set Renderer</h1>
-        <p>Interactive Web Demo - Click to zoom, explore the infinite fractal beauty</p>
+        <h1>🌀 Multi-Fractal Renderer</h1>
+        <p>Interactive Web Demo - Explore Mandelbrot Set, Julia Set, and more fractal wonders</p>
     </div>
 
     <a href="https://github.com/GeoffreyWang1117/Mandelbrot-Renderer" class="github-link" target="_blank">
@@ -215,11 +215,29 @@
                 <div class="progress-fill" id="progress"></div>
             </div>
             <div class="stats" id="stats">
-                Click on the fractal to zoom in • Drag to pan • Use controls to adjust parameters
+                Click on the fractal to zoom in • Drag to pan • Use controls to adjust parameters • Switch between fractal types
             </div>
         </div>
 
         <div class="controls">
+            <div class="control-group">
+                <label for="fractal-type">Fractal Type:</label>
+                <select id="fractal-type">
+                    <option value="mandelbrot">Mandelbrot Set</option>
+                    <option value="julia">Julia Set</option>
+                </select>
+            </div>
+            
+            <div id="julia-controls" class="control-group" style="display: none;">
+                <label for="julia-cx">Julia C (Real):</label>
+                <input type="range" id="julia-cx" min="-2" max="2" value="-0.7269" step="0.0001">
+                <span id="julia-cx-value">-0.7269</span>
+                
+                <label for="julia-cy">Julia C (Imaginary):</label>
+                <input type="range" id="julia-cy" min="-2" max="2" value="0.1889" step="0.0001">
+                <span id="julia-cy-value">0.1889</span>
+            </div>
+
             <div class="control-group">
                 <label for="iterations">Max Iterations:</label>
                 <input type="range" id="iterations" min="50" max="1000" value="100" step="10">

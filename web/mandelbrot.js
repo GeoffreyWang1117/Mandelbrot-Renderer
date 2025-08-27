@@ -1,22 +1,37 @@
-// Mandelbrot Web Renderer - Interactive JavaScript Implementation
+// Multi-Fractal Web Renderer - Interactive JavaScript Implementation
 // High-performance web demo with progressive rendering
+// Supports: Mandelbrot Set, Julia Set, and more
 //
 // Author: Geoffrey Wang (with Claude AI assistance)
-// Date: August 12, 2025
+// Date: August 13, 2025
 // Repository: https://github.com/GeoffreyWang1117/Mandelbrot-Renderer
 
-class MandelbrotRenderer {
+class FractalRenderer {
     constructor() {
         this.canvas = document.getElementById('mandelbrot-canvas');
+        if (!this.canvas) {
+            console.error('❌ Canvas element not found!');
+            throw new Error('Canvas element not found');
+        }
+        
         this.ctx = this.canvas.getContext('2d');
+        if (!this.ctx) {
+            console.error('❌ 2D context not available!');
+            throw new Error('2D context not available');
+        }
+        
         this.width = 800;
         this.height = 600;
         
         // Fractal parameters
+        this.fractalType = 'mandelbrot'; // 'mandelbrot' or 'julia'
         this.centerX = -0.5;
         this.centerY = 0.0;
         this.zoom = 1.0;
         this.maxIterations = 100;
+        
+        // Julia set parameters
+        this.juliaC = { x: -0.7269, y: 0.1889 };
         
         // Rendering state
         this.isRendering = false;
@@ -50,6 +65,26 @@ class MandelbrotRenderer {
         this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
         this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         
+        // Fractal type selector
+        document.getElementById('fractal-type').addEventListener('change', (e) => {
+            this.fractalType = e.target.value;
+            this.updateFractalControls();
+            this.render();
+        });
+        
+        // Julia set parameter controls
+        document.getElementById('julia-cx').addEventListener('input', (e) => {
+            this.juliaC.x = parseFloat(e.target.value);
+            document.getElementById('julia-cx-value').textContent = e.target.value;
+            if (this.fractalType === 'julia') this.render();
+        });
+        
+        document.getElementById('julia-cy').addEventListener('input', (e) => {
+            this.juliaC.y = parseFloat(e.target.value);
+            document.getElementById('julia-cy-value').textContent = e.target.value;
+            if (this.fractalType === 'julia') this.render();
+        });
+        
         // Control inputs
         document.getElementById('iterations').addEventListener('input', (e) => {
             this.maxIterations = parseInt(e.target.value);
@@ -66,16 +101,10 @@ class MandelbrotRenderer {
         document.getElementById('reset-btn').addEventListener('click', () => this.resetView());
         document.getElementById('save-btn').addEventListener('click', () => this.saveImage());
         
-        // Preset locations
-        document.getElementById('classic-btn').addEventListener('click', () => {
-            this.centerX = -0.5; this.centerY = 0.0; this.zoom = 1.0; this.render();
-        });
-        document.getElementById('spiral-btn').addEventListener('click', () => {
-            this.centerX = -0.7269; this.centerY = 0.1889; this.zoom = 100; this.render();
-        });
-        document.getElementById('seahorse-btn').addEventListener('click', () => {
-            this.centerX = -0.7453; this.centerY = 0.1127; this.zoom = 200; this.render();
-        });
+        // Preset locations (update for current fractal)
+        document.getElementById('classic-btn').addEventListener('click', () => this.loadPreset('classic'));
+        document.getElementById('spiral-btn').addEventListener('click', () => this.loadPreset('spiral'));
+        document.getElementById('seahorse-btn').addEventListener('click', () => this.loadPreset('seahorse'));
     }
     
     handleCanvasClick(e) {
@@ -155,9 +184,84 @@ class MandelbrotRenderer {
     
     saveImage() {
         const link = document.createElement('a');
-        link.download = `mandelbrot_${Date.now()}.png`;
+        link.download = `${this.fractalType}_${Date.now()}.png`;
         link.href = this.canvas.toDataURL();
         link.click();
+    }
+    
+    // Update UI controls based on fractal type
+    updateFractalControls() {
+        const juliaControls = document.getElementById('julia-controls');
+        if (this.fractalType === 'julia') {
+            juliaControls.style.display = 'block';
+            // Reset view for Julia set
+            this.centerX = 0.0;
+            this.centerY = 0.0;
+            this.zoom = 1.0;
+        } else {
+            juliaControls.style.display = 'none';
+            // Reset view for Mandelbrot
+            this.centerX = -0.5;
+            this.centerY = 0.0;
+            this.zoom = 1.0;
+        }
+        
+        // Update UI sliders
+        document.getElementById('zoom').value = this.zoom;
+        document.getElementById('zoom-value').textContent = this.zoom.toFixed(1) + 'x';
+    }
+    
+    // Load fractal-specific presets
+    loadPreset(preset) {
+        if (this.fractalType === 'mandelbrot') {
+            switch(preset) {
+                case 'classic':
+                    this.centerX = -0.5; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'spiral':
+                    this.centerX = -0.7269; this.centerY = 0.1889; this.zoom = 100;
+                    break;
+                case 'seahorse':
+                    this.centerX = -0.7453; this.centerY = 0.1127; this.zoom = 200;
+                    break;
+            }
+        } else if (this.fractalType === 'julia') {
+            switch(preset) {
+                case 'classic':
+                    this.juliaC.x = -0.7269; this.juliaC.y = 0.1889;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'spiral':
+                    this.juliaC.x = -0.4; this.juliaC.y = 0.6;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'seahorse':
+                    this.juliaC.x = 0.285; this.juliaC.y = 0.01;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+            }
+            // Update Julia parameter sliders
+            document.getElementById('julia-cx').value = this.juliaC.x;
+            document.getElementById('julia-cx-value').textContent = this.juliaC.x.toFixed(4);
+            document.getElementById('julia-cy').value = this.juliaC.y;
+            document.getElementById('julia-cy-value').textContent = this.juliaC.y.toFixed(4);
+        }
+        
+        // Update zoom slider
+        document.getElementById('zoom').value = this.zoom;
+        document.getElementById('zoom-value').textContent = this.zoom.toFixed(1) + 'x';
+        
+        this.render();
+    }
+    
+    // Core fractal computation dispatcher
+    computeIterations(cx, cy) {
+        if (this.fractalType === 'mandelbrot') {
+            return this.mandelbrotIterations(cx, cy);
+        } else if (this.fractalType === 'julia') {
+            return this.juliaIterations(cx, cy);
+        }
+        return 0;
     }
     
     // Core Mandelbrot computation
@@ -168,6 +272,21 @@ class MandelbrotRenderer {
         while (x*x + y*y < 4.0 && iterations < this.maxIterations) {
             const xtemp = x*x - y*y + cx;
             y = 2*x*y + cy;
+            x = xtemp;
+            iterations++;
+        }
+        
+        return iterations;
+    }
+    
+    // Core Julia set computation
+    juliaIterations(cx, cy) {
+        let x = cx, y = cy;
+        let iterations = 0;
+        
+        while (x*x + y*y < 4.0 && iterations < this.maxIterations) {
+            const xtemp = x*x - y*y + this.juliaC.x;
+            y = 2*x*y + this.juliaC.y;
             x = xtemp;
             iterations++;
         }
@@ -242,8 +361,8 @@ class MandelbrotRenderer {
                 const cx = minX + (maxX - minX) * x / (this.width - 1);
                 const cy = minY + (maxY - minY) * y / (this.height - 1);
                 
-                // Compute Mandelbrot iterations
-                const iterations = this.mandelbrotIterations(cx, cy);
+                // Compute fractal iterations
+                const iterations = this.computeIterations(cx, cy);
                 const [r, g, b] = this.iterationsToColor(iterations);
                 
                 // Set pixel in image data
@@ -310,10 +429,12 @@ class MandelbrotRenderer {
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new MandelbrotRenderer();
+    new FractalRenderer();
     
-    console.log('🌀 Mandelbrot Web Renderer initialized!');
+    console.log('🌀 Multi-Fractal Web Renderer initialized!');
     console.log('💡 Click on the fractal to zoom in, drag to pan');
+    console.log('🔄 Switch between Mandelbrot Set and Julia Set');
+    console.log('⚙️ Adjust parameters using the control panel');
     console.log('🚀 For ultimate performance, check out the CUDA GPU version!');
     console.log('👨‍💻 Created by Geoffrey Wang with Claude AI assistance');
     console.log('📁 https://github.com/GeoffreyWang1117/Mandelbrot-Renderer');
