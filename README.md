@@ -1,8 +1,12 @@
-# Mandelbrot Set Fractal Renderer
+# High-Performance Fractal Rend| | ✅ **Step 8** | **Julia Set implementation** | **C++/CUDA/Web** | ✅ **Completed** |
+| ✅ **Step 9** | **Burning Ship & Newton fractals** | **Advanced algorithms** | ✅ **Completed** |
+| 🟦 **Step 10** | **Additional complex fractals** | **Unified framework** | 🚧 **In Progress** |
+| 🟪 **Step 11** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
+| � **Step 12** | WebAssembly port for enhanced web performance | Emscripten | 💤 **Planned** |Step 8** | **Julia Set implementation** | **C++/CUDA/Web** | ✅ **Completed** |rer
 
 *Read this in other languages: [English](README.md) | [中文](README_CN.md)*
 
-A high-performance Mandelbrot set fractal renderer with multiple parallel computing implementations, showcasing the evolution from single-threaded CPU to massively parallel GPU computing.
+A high-performance fractal rendering engine with multiple parallel computing implementations, featuring Mandelbrot set, Julia set, and other beautiful mathematical fractals. Showcases the evolution from single-threaded CPU to massively parallel GPU computing.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![C++](https://img.shields.io/badge/C++-17-blue)
@@ -11,10 +15,13 @@ A high-performance Mandelbrot set fractal renderer with multiple parallel comput
 
 ## 🌐 Interactive Web Demo
 
-**[🚀 Try the Live Demo](https://geoffreywtech.me/Mandelbrot-Renderer/)** - Experience the Mandelbrot set directly in your browser!
+**[🚀 Try the Live Demo](https://geoffreywtech.me/Mandelbrot-Renderer/)** - Experience multiple fractal types directly in your browser!
 
-- **Click to zoom** at any point
-- **Drag to pan** around the fractal  
+- **Switch between fractal types** - Mandelbrot Set, Julia Set, Burning Ship, Newton Fractal
+- **Click to zoom** at any point  
+- **Drag to pan** around the fractal
+- **Adjust Julia Set parameters** in real-time
+- **Explore unique mathematical algorithms** with distinctive visual characteristics
 - **Real-time rendering** with performance metrics
 - **Mobile responsive** design
 
@@ -29,10 +36,71 @@ A high-performance Mandelbrot set fractal renderer with multiple parallel comput
 | ✅ **Step 5** | Generate zoom animation frames and video synthesis | Python+FFmpeg | ✅ **Completed** |
 | ✅ **Step 6** | CUDA/GPU accelerated version comparison | CUDA | ✅ **Completed** |
 | ✅ **Step 7** | Interactive web demo | HTML5 + JavaScript | ✅ **Completed** |
-| 🟦 **Step 8** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
-| 🟪 **Step 9** | WebAssembly port for enhanced web performance | Emscripten | 💤 **Planned** |
+| � **Step 8** | **Julia Set implementation** | **C++/CUDA/Web** | 🚧 **In Progress** |
+| 🟦 **Step 9** | **Additional fractals (Burning Ship, Newton)** | **Unified framework** | 📋 **Planned** |
+| 🟪 **Step 10** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
+| � **Step 11** | WebAssembly port for enhanced web performance | Emscripten | 💤 **Planned** |
+
+## Fractal Types Roadmap
+
+### 🎯 **Phase 1: Core Expansion (High Priority)**
+| Fractal | Complexity | Mathematical Relation | Implementation Status |
+|---------|------------|----------------------|---------------------|
+| ✅ **Mandelbrot Set** | ⭐⭐⭐ | z² + c iteration | ✅ **Complete** |
+| ✅ **Julia Set** | ⭐⭐⭐ | z² + c (fixed c) | ✅ **Complete** |
+| ✅ **Burning Ship** | ⭐⭐⭐ | abs(z)² + c | ✅ **Complete** |
+| ✅ **Newton Fractal** | ⭐⭐⭐⭐ | Newton's root finding | ✅ **Complete** |
+
+### 🎨 **Phase 2: Geometric Fractals (Medium Priority)**
+| Fractal | Complexity | Type | Implementation Status |
+|---------|------------|------|---------------------|
+| 📋 **Sierpinski Triangle** | ⭐⭐ | Geometric IFS | 📋 **Planned** |
+| 📋 **Barnsley Fern** | ⭐⭐⭐ | Natural IFS | 📋 **Planned** |
+| 📋 **Dragon Curve** | ⭐⭐ | L-System | 📋 **Planned** |
+
+### 🧠 **Phase 3: Advanced Fractals (Future)**
+- Lorenz Attractor
+- Strange Attractors
+- IFS (Iterated Function Systems)
+
+## 🎨 Fractal Algorithm Showcase
+
+Our implementation features four mathematically sophisticated fractal algorithms, each demonstrating unique properties of complex dynamical systems:
+
+### 🌀 **Mandelbrot Set**
+**Algorithm**: `z_{n+1} = z_n² + c`
+- **Mathematical Concept**: Classic escape-time fractal mapping complex plane stability
+- **Visual Characteristics**: Self-similar boundary structures with infinite detail
+- **Implementation**: Standard iteration with convergence threshold detection
+
+### � **Burning Ship Fractal**  
+**Algorithm**: `z_{n+1} = (|Re(z_n)| + i|Im(z_n)|)² + c`
+- **Mathematical Concept**: Mandelbrot variant using absolute value transformation
+- **Visual Characteristics**: Ship-like structures with intricate flame patterns
+- **Implementation**: Fire-themed HSV color mapping with enhanced gradient smoothing
+
+### 🌊 **Julia Set**
+**Algorithm**: `z_{n+1} = z² + c` (where c is fixed parameter)
+- **Mathematical Concept**: Dynamic parameter exploration of complex polynomial iteration
+- **Visual Characteristics**: Connected or dust-like structures depending on parameter choice
+- **Implementation**: Interactive parameter control with real-time visualization
+
+### 🎯 **Newton Fractal**
+**Algorithm**: `z_{n+1} = z_n - f(z_n)/f'(z_n)` for `f(z) = z³ - 1`
+- **Mathematical Concept**: Root-finding convergence basins using Newton's method
+- **Visual Characteristics**: Three colored regions showing convergence to cube roots of unity
+- **Implementation**: Complex arithmetic with convergence detection and basin coloring
+
+Each algorithm demonstrates different aspects of complex analysis: escape dynamics (Mandelbrot/Burning Ship), parameter sensitivity (Julia), and numerical root-finding (Newton).
 
 ## Features
+
+- **Multiple Fractal Types**:
+  - ✅ **Mandelbrot Set**: Classic escape-time fractal
+  - ✅ **Julia Set**: Dynamic parameter exploration  
+  - ✅ **Burning Ship**: Mandelbrot variant with absolute values
+  - ✅ **Newton Fractal**: Root-finding visualization
+  - 📋 **Geometric Fractals**: Sierpinski, Barnsley Fern, Dragon Curve (future)
 
 - **Multiple Implementation Approaches**:
   - Pure CPU single-threaded implementation
@@ -47,6 +115,7 @@ A high-performance Mandelbrot set fractal renderer with multiple parallel comput
   - Scales from small images to ultra-high resolution (tested up to 4K+)
 
 - **Flexible Configuration**:
+  - Multiple fractal type selection
   - Adjustable image resolution
   - Customizable iteration counts
   - Configurable complex plane regions

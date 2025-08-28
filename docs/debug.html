@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Fractal</title>
+</head>
+<body>
+    <h1>Debug Fractal Renderer</h1>
+    <canvas id="mandelbrot-canvas" width="800" height="600" style="border: 1px solid red;"></canvas>
+    
+    <!-- Required UI elements -->
+    <div id="julia-controls" style="display: none;">
+        <input type="range" id="julia-cx" min="-2" max="2" value="-0.7269" step="0.0001">
+        <span id="julia-cx-value">-0.7269</span>
+        <input type="range" id="julia-cy" min="-2" max="2" value="0.1889" step="0.0001">
+        <span id="julia-cy-value">0.1889</span>
+    </div>
+    
+    <select id="fractal-type">
+        <option value="mandelbrot">Mandelbrot</option>
+        <option value="julia">Julia</option>
+    </select>
+    
+    <input type="range" id="iterations" min="50" max="1000" value="100">
+    <span id="iterations-value">100</span>
+    
+    <input type="range" id="zoom" min="1" max="1000" value="1">
+    <span id="zoom-value">1x</span>
+    
+    <button id="render-btn">Render</button>
+    <button id="reset-btn">Reset</button>
+    <button id="save-btn">Save</button>
+    <button id="classic-btn">Classic</button>
+    <button id="spiral-btn">Spiral</button>
+    <button id="seahorse-btn">Seahorse</button>
+    
+    <div id="progress" style="width: 0%; height: 20px; background: green;"></div>
+    <div id="stats">Stats here</div>
+    <div id="web-perf">Performance</div>
+    
+    <script src="mandelbrot.js"></script>
+</body>
+</html>

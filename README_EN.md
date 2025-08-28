@@ -16,15 +16,31 @@ A high-performance Mandelbrot set fractal renderer with multiple parallel comput
 - **Real-time rendering** with performance metrics
 - **Mobile responsive** design
 
+## Project Roadmap & Development Stages
+
+| Stage | Feature | Technology | Status |
+|-------|---------|------------|---------|
+| ✅ **Step 1** | Basic CLI rendering (grayscale PNG output) | C++ + STL | ✅ **Completed** |
+| ✅ **Step 2** | OpenMP parallel acceleration | OpenMP | ✅ **Completed** |
+| ✅ **Step 3** | Color rendering (escape time → color mapping) | HSV color interpolation | ✅ **Completed** |
+| ✅ **Step 4** | Command line parameter control for regions/resolution | `argc/argv`, `getopt` | ✅ **Completed** |
+| ✅ **Step 5** | Generate zoom animation frames and video synthesis | Python+FFmpeg | ✅ **Completed** |
+| ✅ **Step 6** | CUDA/GPU accelerated version comparison | CUDA | ✅ **Completed** |
+| ✅ **Step 7** | Interactive web demo | HTML5 + JavaScript | ✅ **Completed** |
+| 🟦 **Step 8** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
+| 🟪 **Step 9** | WebAssembly port for enhanced web performance | Emscripten | 💤 **Planned** |
+
 ## Features
 
 - **Multiple Implementation Approaches**:
   - Pure CPU single-threaded implementation
-  - OpenMP multi-threaded CPU parallelization
+  - OpenMP multi-threaded CPU parallelization  
   - CUDA GPU massively parallel implementation
+  - Interactive web JavaScript version
   
 - **High Performance**:
   - Up to **2 billion pixels/second** on dual RTX 3090 setup
+  - **34,000x speedup** over web JavaScript version
   - **1,216x speedup** over single-threaded CPU
   - Scales from small images to ultra-high resolution (tested up to 4K+)
 
@@ -38,6 +54,7 @@ A high-performance Mandelbrot set fractal renderer with multiple parallel comput
 - **Professional Output**:
   - High-quality PPM image format
   - Smooth color gradients using HSV color space
+  - Animation generation with Python scripts
   - Batch processing capabilities
   - Comprehensive performance reporting
 
@@ -249,6 +266,52 @@ Contributions are welcome! Areas for improvement:
 - **Additional color schemes**: Implement different coloring algorithms
 - **Real-time rendering**: Add interactive visualization capabilities
 - **Memory optimization**: Implement tiled rendering for ultra-large images
+- **Julia Set support**: Add support for other fractal types
+- **OpenGL GUI**: Real-time interactive zoom and pan interface
+- **WebAssembly port**: High-performance web version using native code
+
+## Technical Keywords
+
+`#C++` `#OpenMP` `#CUDA` `#Fractal` `#ParallelComputing` `#FFmpeg`  
+`#ImageRendering` `#NumericalPrecision` `#ZoomAnimation` `#WebGL` `#GPGPU`
+
+## Performance & Benchmark Plans
+
+| Configuration | Resolution | Single CPU | OpenMP 4 threads | OpenMP 16 threads | CUDA GPU |
+|---------------|------------|------------|-------------------|-------------------|-----------|
+| Intel i7-12800HX | 800×600 | 3.2s | 1.2s | 0.42s | 0.024s |
+| AMD 5950X | 1920×1080 | ~8s | ~2s | ~0.7s | ~0.06s |
+| RTX 3090 | 4000×3000 | N/A | N/A | N/A | 0.006s |
+
+📊 Benchmark output format (CSV + plots):
+
+```csv
+resolution,implementation,threads,time_ms,pixels_per_sec
+800x600,cpu,1,3200,150000
+800x600,openmp,16,420,1140000  
+800x600,cuda,1024,24,20000000
+4000x3000,cuda,1024,6,2000000000
+```
+
+## Future Development Plans
+
+### Short-term (1-2 months)
+- [ ] **OpenGL real-time renderer**: Interactive zoom/pan with immediate feedback
+- [ ] **Multi-GPU support**: Distribute rendering across multiple GPUs
+- [ ] **Advanced coloring**: Additional color schemes and algorithms
+- [ ] **Performance profiling**: Detailed analysis tools and optimizations
+
+### Medium-term (3-6 months)  
+- [ ] **WebAssembly port**: High-performance web version using native code
+- [ ] **Julia Set support**: Extend to other fractal types
+- [ ] **Precision options**: Arbitrary precision arithmetic support
+- [ ] **Distributed computing**: Network-based multi-machine rendering
+
+### Long-term (6+ months)
+- [ ] **VR/AR visualization**: Immersive fractal exploration
+- [ ] **Machine learning optimization**: AI-assisted parameter optimization
+- [ ] **Cloud rendering service**: Scalable server-based rendering
+- [ ] **Educational platform**: Interactive learning tools for fractal mathematics
 
 ## License
 

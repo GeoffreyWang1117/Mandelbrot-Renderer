@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Renderer Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f0f0f0;
+        }
+        canvas { 
+            border: 2px solid #333; 
+            background: white;
+            display: block;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        select, input[type="range"] {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌀 Fractal Renderer Test</h1>
+    
+    <div class="controls">
+        <label for="fractal-type">Fractal Type:</label>
+        <select id="fractal-type">
+            <option value="mandelbrot">Mandelbrot Set</option>
+            <option value="julia">Julia Set</option>
+        </select>
+    </div>
+    
+    <div id="julia-controls" class="controls" style="display: none;">
+        <label for="julia-cx">Julia C (Real):</label>
+        <input type="range" id="julia-cx" min="-2" max="2" value="-0.7269" step="0.0001">
+        <span id="julia-cx-value">-0.7269</span>
+        <br>
+        <label for="julia-cy">Julia C (Imaginary):</label>
+        <input type="range" id="julia-cy" min="-2" max="2" value="0.1889" step="0.0001">
+        <span id="julia-cy-value">0.1889</span>
+    </div>
+    
+    <div class="controls">
+        <label for="iterations">Max Iterations:</label>
+        <input type="range" id="iterations" min="50" max="1000" value="100" step="10">
+        <span id="iterations-value">100</span>
+    </div>
+    
+    <div class="controls">
+        <button id="render-btn">🚀 Render</button>
+        <button id="reset-btn">🔄 Reset View</button>
+    </div>
+    
+    <canvas id="mandelbrot-canvas" width="400" height="300"></canvas>
+    
+    <div id="progress-container" style="width: 400px; height: 10px; background: #ddd; border-radius: 5px;">
+        <div id="progress" style="width: 0%; height: 100%; background: #28a745; border-radius: 5px; transition: width 0.1s;"></div>
+    </div>
+    
+    <div id="stats">Ready to render...</div>
+
+    <script>
+        console.log('🧪 Starting fractal renderer test...');
+        
+        class SimpleFractalRenderer {
+            constructor() {
+                this.canvas = document.getElementById('mandelbrot-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.width = 400;
+                this.height = 300;
+                
+                // Fractal parameters
+                this.fractalType = 'mandelbrot';
+                this.centerX = -0.5;
+                this.centerY = 0.0;
+                this.zoom = 1.0;
+                this.maxIterations = 100;
+                
+                // Julia set parameters
+                this.juliaC = { x: -0.7269, y: 0.1889 };
+                
+                this.setupEventListeners();
+                console.log('✅ Renderer initialized');
+                this.render();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('fractal-type').addEventListener('change', (e) => {
+                    this.fractalType = e.target.value;
+                    this.updateFractalControls();
+                    this.render();
+                });
+                
+                document.getElementById('julia-cx').addEventListener('input', (e) => {
+                    this.juliaC.x = parseFloat(e.target.value);
+                    document.getElementById('julia-cx-value').textContent = e.target.value;
+                    if (this.fractalType === 'julia') this.render();
+                });
+                
+                document.getElementById('julia-cy').addEventListener('input', (e) => {
+                    this.juliaC.y = parseFloat(e.target.value);
+                    document.getElementById('julia-cy-value').textContent = e.target.value;
+                    if (this.fractalType === 'julia') this.render();
+                });
+                
+                document.getElementById('iterations').addEventListener('input', (e) => {
+                    this.maxIterations = parseInt(e.target.value);
+                    document.getElementById('iterations-value').textContent = e.target.value;
+                });
+                
+                document.getElementById('render-btn').addEventListener('click', () => this.render());
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetView());
+            }
+            
+            updateFractalControls() {
+                const juliaControls = document.getElementById('julia-controls');
+                if (this.fractalType === 'julia') {
+                    juliaControls.style.display = 'block';
+                    this.centerX = 0.0;
+                    this.centerY = 0.0;
+                } else {
+                    juliaControls.style.display = 'none';
+                    this.centerX = -0.5;
+                    this.centerY = 0.0;
+                }
+                this.zoom = 1.0;
+            }
+            
+            resetView() {
+                this.updateFractalControls();
+                this.maxIterations = 100;
+                document.getElementById('iterations').value = 100;
+                document.getElementById('iterations-value').textContent = '100';
+                this.render();
+            }
+            
+            computeIterations(cx, cy) {
+                if (this.fractalType === 'mandelbrot') {
+                    return this.mandelbrotIterations(cx, cy);
+                } else if (this.fractalType === 'julia') {
+                    return this.juliaIterations(cx, cy);
+                }
+                return 0;
+            }
+            
+            mandelbrotIterations(cx, cy) {
+                let x = 0.0, y = 0.0;
+                let iterations = 0;
+                
+                while (x*x + y*y < 4.0 && iterations < this.maxIterations) {
+                    const xtemp = x*x - y*y + cx;
+                    y = 2*x*y + cy;
+                    x = xtemp;
+                    iterations++;
+                }
+                
+                return iterations;
+            }
+            
+            juliaIterations(cx, cy) {
+                let x = cx, y = cy;
+                let iterations = 0;
+                
+                while (x*x + y*y < 4.0 && iterations < this.maxIterations) {
+                    const xtemp = x*x - y*y + this.juliaC.x;
+                    y = 2*x*y + this.juliaC.y;
+                    x = xtemp;
+                    iterations++;
+                }
+                
+                return iterations;
+            }
+            
+            iterationsToColor(iterations) {
+                if (iterations === this.maxIterations) {
+                    return [0, 0, 0];
+                }
+                
+                const t = iterations / this.maxIterations;
+                const hue = t * 360;
+                const saturation = 1.0;
+                const value = t < 1.0 ? 1.0 : 0.0;
+                
+                return this.hsvToRgb(hue, saturation, value);
+            }
+            
+            hsvToRgb(h, s, v) {
+                const c = v * s;
+                const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+                const m = v - c;
+                
+                let r, g, b;
+                if (h < 60) { r = c; g = x; b = 0; }
+                else if (h < 120) { r = x; g = c; b = 0; }
+                else if (h < 180) { r = 0; g = c; b = x; }
+                else if (h < 240) { r = 0; g = x; b = c; }
+                else if (h < 300) { r = x; g = 0; b = c; }
+                else { r = c; g = 0; b = x; }
+                
+                return [
+                    Math.round((r + m) * 255),
+                    Math.round((g + m) * 255),
+                    Math.round((b + m) * 255)
+                ];
+            }
+            
+            render() {
+                console.log(`🎨 Rendering ${this.fractalType}...`);
+                document.getElementById('stats').textContent = 'Rendering...';
+                
+                const imageData = this.ctx.createImageData(this.width, this.height);
+                const scale = 4.0 / this.zoom;
+                const minX = this.centerX - scale / 2;
+                const maxX = this.centerX + scale / 2;
+                const minY = this.centerY - scale / 2;
+                const maxY = this.centerY + scale / 2;
+                
+                let pixelIndex = 0;
+                const startTime = performance.now();
+                
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const cx = minX + (maxX - minX) * x / (this.width - 1);
+                        const cy = minY + (maxY - minY) * y / (this.height - 1);
+                        
+                        const iterations = this.computeIterations(cx, cy);
+                        const [r, g, b] = this.iterationsToColor(iterations);
+                        
+                        const dataIndex = pixelIndex * 4;
+                        imageData.data[dataIndex] = r;
+                        imageData.data[dataIndex + 1] = g;
+                        imageData.data[dataIndex + 2] = b;
+                        imageData.data[dataIndex + 3] = 255;
+                        
+                        pixelIndex++;
+                    }
+                    
+                    // Update progress
+                    const progress = ((y + 1) / this.height) * 100;
+                    document.getElementById('progress').style.width = progress + '%';
+                }
+                
+                this.ctx.putImageData(imageData, 0, 0);
+                
+                const elapsed = performance.now() - startTime;
+                const pixelsPerSecond = Math.floor((this.width * this.height) / (elapsed / 1000));
+                
+                document.getElementById('stats').textContent = 
+                    `${this.fractalType} rendered in ${elapsed.toFixed(0)}ms | ` +
+                    `${pixelsPerSecond.toLocaleString()} pixels/sec`;
+                    
+                console.log(`✅ ${this.fractalType} rendering complete: ${elapsed.toFixed(0)}ms`);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimpleFractalRenderer();
+        });
+    </script>
+</body>
+</html>

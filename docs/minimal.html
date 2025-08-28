@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Fractal Test</title>
+</head>
+<body>
+    <h1>Minimal Fractal Test</h1>
+    <canvas id="mandelbrot-canvas" width="400" height="300" style="border: 1px solid black;"></canvas>
+    <div>
+        <button onclick="testMandelbrot()">Test Mandelbrot</button>
+        <button onclick="testJulia()">Test Julia</button>
+    </div>
+    <div id="status">Ready</div>
+    
+    <script>
+        console.log('Starting minimal test...');
+        
+        function testMandelbrot() {
+            const canvas = document.getElementById('mandelbrot-canvas');
+            const ctx = canvas.getContext('2d');
+            document.getElementById('status').textContent = 'Rendering Mandelbrot...';
+            
+            const imageData = ctx.createImageData(400, 300);
+            
+            for (let y = 0; y < 300; y++) {
+                for (let x = 0; x < 400; x++) {
+                    const cx = (x - 200) / 100 - 0.5;
+                    const cy = (y - 150) / 100;
+                    
+                    let zx = 0, zy = 0;
+                    let iterations = 0;
+                    
+                    while (zx*zx + zy*zy < 4 && iterations < 100) {
+                        const tmp = zx*zx - zy*zy + cx;
+                        zy = 2*zx*zy + cy;
+                        zx = tmp;
+                        iterations++;
+                    }
+                    
+                    const color = iterations === 100 ? 0 : iterations * 2.55;
+                    const index = (y * 400 + x) * 4;
+                    imageData.data[index] = color;
+                    imageData.data[index + 1] = color;
+                    imageData.data[index + 2] = color;
+                    imageData.data[index + 3] = 255;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            document.getElementById('status').textContent = 'Mandelbrot complete!';
+        }
+        
+        function testJulia() {
+            const canvas = document.getElementById('mandelbrot-canvas');
+            const ctx = canvas.getContext('2d');
+            document.getElementById('status').textContent = 'Rendering Julia...';
+            
+            const imageData = ctx.createImageData(400, 300);
+            const juliaC = { x: -0.7269, y: 0.1889 };
+            
+            for (let y = 0; y < 300; y++) {
+                for (let x = 0; x < 400; x++) {
+                    let zx = (x - 200) / 100;
+                    let zy = (y - 150) / 100;
+                    let iterations = 0;
+                    
+                    while (zx*zx + zy*zy < 4 && iterations < 100) {
+                        const tmp = zx*zx - zy*zy + juliaC.x;
+                        zy = 2*zx*zy + juliaC.y;
+                        zx = tmp;
+                        iterations++;
+                    }
+                    
+                    const color = iterations === 100 ? 0 : iterations * 2.55;
+                    const index = (y * 400 + x) * 4;
+                    imageData.data[index] = color;
+                    imageData.data[index + 1] = color;
+                    imageData.data[index + 2] = color;
+                    imageData.data[index + 3] = 255;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            document.getElementById('status').textContent = 'Julia complete!';
+        }
+        
+        console.log('Minimal test ready');
+    </script>
+</body>
+</html>

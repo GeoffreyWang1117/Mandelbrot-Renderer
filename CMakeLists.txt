@@ -1,14 +1,18 @@
-# Mandelbrot 分形渲染器项目
+# 高性能分形渲染器项目
+# 支持多种分形类型: Mandelbrot/Julia/Burning Ship/Newton
 # 支持多种并行计算方式: CPU/OpenMP/CUDA/OpenGL
 #
 # 编译选项:
 # - CPU版本: cmake .. && make mandelbrot_cpu
 # - OpenMP版本: cmake -DENABLE_OPENMP=ON .. && make mandelbrot_omp  
 # - CUDA版本: cmake -DENABLE_CUDA=ON .. && make mandelbrot_cuda
+# - Julia集测试: make julia_test
+# - Burning Ship测试: make burning_ship_test
+# - Newton分形测试: make newton_fractal_test
 # - 完整版本: cmake -DENABLE_ALL=ON .. && make
 
 cmake_minimum_required(VERSION 3.12)
-project(MandelbrotRenderer LANGUAGES CXX)
+project(FractalRenderer LANGUAGES CXX)
 
 # C++17标准
 set(CMAKE_CXX_STANDARD 17)
@@ -38,6 +42,49 @@ add_executable(mandelbrot_cpu
 )
 
 target_compile_definitions(mandelbrot_cpu PRIVATE CPU_VERSION)
+
+# =============================================================================
+# Julia Set 分形渲染器
+# =============================================================================
+add_executable(julia_test
+    src/julia_test.cpp
+    src/julia.cpp
+)
+
+# Julia Set OpenMP版本
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(julia_test OpenMP::OpenMP_CXX)
+    target_compile_definitions(julia_test PRIVATE JULIA_OPENMP_SUPPORT)
+endif()
+
+# =============================================================================
+# Burning Ship 分形渲染器
+# =============================================================================
+add_executable(burning_ship_test
+    src/burning_ship_test.cpp
+    src/burning_ship.cpp
+)
+
+# Burning Ship OpenMP版本
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(burning_ship_test OpenMP::OpenMP_CXX)
+    target_compile_definitions(burning_ship_test PRIVATE BURNING_SHIP_OPENMP_SUPPORT)
+endif()
+
+# =============================================================================
+# Newton Fractal 分形渲染器
+# =============================================================================
+add_executable(newton_fractal_test
+    src/newton_fractal_test.cpp
+    src/newton_fractal.cpp
+)
+
+# Newton Fractal OpenMP版本
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(newton_fractal_test OpenMP::OpenMP_CXX)
+    target_compile_definitions(newton_fractal_test PRIVATE NEWTON_FRACTAL_OPENMP_SUPPORT)
+endif()
 
 # =============================================================================
 # 可选组件配置

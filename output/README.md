@@ -2,20 +2,6 @@
 
 这个目录用于存放渲染生成的图像和视频文件。
 
-**项目作者**: Geoffrey Wang (with Claude AI assistance)  
-**项目地址**: https://github.com/GeoffreyWang1117/Mandelbrot-Renderer
-
-## 性能对比示例
-
-本目录中的图像展示了不同实现方式的性能特点:
-
-| 实现方式 | 分辨率 | 渲染时间 | 性能 | 加速比 |
-|---------|--------|----------|------|--------|
-| Web JavaScript | 800×600 | ~10s | 50K pixels/sec | 1x |
-| CPU单线程 | 800×600 | 292ms | 1.6M pixels/sec | 32x |
-| OpenMP并行 | 800×600 | 4ms | 120M pixels/sec | 2,400x |
-| **CUDA GPU** | **4K** | **7ms** | **1.7B pixels/sec** | **34,000x** |
-
 ## 文件类型
 
 - `*.ppm` - PPM格式图像 (可用ImageMagick转换为PNG)
