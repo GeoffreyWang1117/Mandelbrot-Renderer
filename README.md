@@ -1,4 +1,6 @@
-# High-Performance Fractal Rend| | ✅ **Step 8** | **Julia Set implementation** | **C++/CUDA/Web** | ✅ **Completed** |
+# High-Performance Fractal Rend| # High-Performance Fractal Renderer
+
+*Read this in other languages: [English](README.md) | [中文](README_CN.md)*
 | ✅ **Step 9** | **Burning Ship & Newton fractals** | **Advanced algorithms** | ✅ **Completed** |
 | 🟦 **Step 10** | **Additional complex fractals** | **Unified framework** | 🚧 **In Progress** |
 | 🟪 **Step 11** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
@@ -15,8 +17,9 @@ A high-performance fractal rendering engine with multiple parallel computing imp
 
 ## 🌐 Interactive Web Demo
 
-**[🚀 Try the Live Demo](https://geoffreywtech.me/Mandelbrot-Renderer/)** - Experience multiple fractal types directly in your browser!
+**[🚀 Try the Live Demo](https://geoffreywang1117.github.io/Mandelbrot-Renderer/)** - Experience multiple fractal types directly in your browser!
 
+### Web JavaScript Version
 - **Switch between fractal types** - Mandelbrot Set, Julia Set, Burning Ship, Newton Fractal
 - **Click to zoom** at any point  
 - **Drag to pan** around the fractal
@@ -24,6 +27,14 @@ A high-performance fractal rendering engine with multiple parallel computing imp
 - **Explore unique mathematical algorithms** with distinctive visual characteristics
 - **Real-time rendering** with performance metrics
 - **Mobile responsive** design
+
+### WebAssembly High-Performance Version
+**[⚡ WebAssembly Fractal Renderer](https://geoffreywang1117.github.io/Mandelbrot-Renderer/wasm-fractal.html)** - Near-native performance in the browser!
+
+- **5-20x faster** than JavaScript implementation
+- **Same interactive features** with enhanced performance
+- **Compiled from C++** using Emscripten
+- **Automatic fallback** to JavaScript if WebAssembly is not supported
 
 ## Project Roadmap & Development Stages
 
@@ -36,10 +47,9 @@ A high-performance fractal rendering engine with multiple parallel computing imp
 | ✅ **Step 5** | Generate zoom animation frames and video synthesis | Python+FFmpeg | ✅ **Completed** |
 | ✅ **Step 6** | CUDA/GPU accelerated version comparison | CUDA | ✅ **Completed** |
 | ✅ **Step 7** | Interactive web demo | HTML5 + JavaScript | ✅ **Completed** |
-| � **Step 8** | **Julia Set implementation** | **C++/CUDA/Web** | 🚧 **In Progress** |
-| 🟦 **Step 9** | **Additional fractals (Burning Ship, Newton)** | **Unified framework** | 📋 **Planned** |
+| ✅ **Step 8** | **Julia Set, Burning Ship & Newton fractals** | **C++/CUDA/Web** | ✅ **Completed** |
+| ✅ **Step 9** | **WebAssembly high-performance web version** | **Emscripten** | ✅ **Completed** |
 | 🟪 **Step 10** | OpenGL GUI with real-time zoom/pan | C++ + GLFW/GLAD | 💤 **Planned** |
-| � **Step 11** | WebAssembly port for enhanced web performance | Emscripten | 💤 **Planned** |
 
 ## Fractal Types Roadmap
 
@@ -107,6 +117,7 @@ Each algorithm demonstrates different aspects of complex analysis: escape dynami
   - OpenMP multi-threaded CPU parallelization  
   - CUDA GPU massively parallel implementation
   - Interactive web JavaScript version
+  - **WebAssembly high-performance web version**
   
 - **High Performance**:
   - Up to **2 billion pixels/second** on dual RTX 3090 setup
@@ -134,6 +145,7 @@ Each algorithm demonstrates different aspects of complex analysis: escape dynami
 | Implementation | 800x600 (ms) | Performance | Speedup | Platform |
 |---|---|---|---|---|
 | **Web JavaScript** | **~10,000** | **50K pixels/sec** | **1.0x** | **Browser** |
+| **WebAssembly** | **~2,000** | **240K pixels/sec** | **5x** | **Browser** |
 | CPU Single-thread | 292 | 1.6M pixels/sec | 32x | Native C++ |
 | OpenMP (32 cores) | 4 | 120M pixels/sec | 2,400x | Multi-core CPU |
 | **CUDA GPU** | **24** | **20M pixels/sec** | **400x** | **GPU** |
@@ -212,10 +224,22 @@ nvcc -O3 -o mandelbrot_cuda mandelbrot_cuda_standalone.cu
 
 ```
 mandelbrot/
-├── web/                           # 🌐 Interactive web demo
+├── docs/                          # 🌐 GitHub Pages deployment
+│   ├── index.html                 # Main web demo (JavaScript)
+│   └── wasm-fractal.html         # WebAssembly high-performance version
+├── web/                           # 🌐 Development web demo
 │   ├── index.html                 # Modern responsive interface
 │   ├── mandelbrot.js             # JavaScript implementation  
 │   └── README.md                 # Web demo documentation
+├── web-wasm/                     # ⚡ WebAssembly development files
+│   ├── fractals_wasm.cpp         # C++ WebAssembly implementation
+│   ├── CMakeLists.txt            # Emscripten build configuration
+│   ├── build.sh                  # WebAssembly build script
+│   └── README.md                 # WebAssembly documentation
+├── wasm/                         # ⚡ WebAssembly build output
+│   ├── src/fractals_wasm.cpp     # Source C++ implementation
+│   ├── CMakeLists.txt            # Build configuration
+│   └── build.sh                  # Compilation script
 ├── src/
 │   ├── render.cpp/hpp            # CPU single-threaded implementation
 │   ├── render_omp.cpp/hpp        # OpenMP multi-threaded implementation  
@@ -337,9 +361,9 @@ Contributions are welcome! Areas for improvement:
 - **Additional color schemes**: Implement different coloring algorithms
 - **Real-time rendering**: Add interactive visualization capabilities
 - **Memory optimization**: Implement tiled rendering for ultra-large images
-- **Julia Set support**: Add support for other fractal types
+- **Additional fractals**: Add support for more fractal types (Sierpinski, Barnsley Fern, etc.)
 - **OpenGL GUI**: Real-time interactive zoom and pan interface
-- **WebAssembly port**: High-performance web version using native code
+- **Performance optimizations**: Further WebAssembly and CUDA improvements
 
 ## Technical Keywords
 
@@ -373,10 +397,10 @@ resolution,implementation,threads,time_ms,pixels_per_sec
 - [ ] **Performance profiling**: Detailed analysis tools and optimizations
 
 ### Medium-term (3-6 months)  
-- [ ] **WebAssembly port**: High-performance web version using native code
-- [ ] **Julia Set support**: Extend to other fractal types
+- [ ] **Additional fractals**: Sierpinski Triangle, Barnsley Fern, Dragon Curve
 - [ ] **Precision options**: Arbitrary precision arithmetic support
 - [ ] **Distributed computing**: Network-based multi-machine rendering
+- [ ] **Mobile apps**: Native iOS/Android applications
 
 ### Long-term (6+ months)
 - [ ] **VR/AR visualization**: Immersive fractal exploration
