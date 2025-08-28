@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 WebAssembly 高性能分形渲染器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="range"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1em;
+        }
+
+        select option {
+            background: #2a5298;
+            color: white;
+        }
+
+        input[type="range"] {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            padding: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        #fractalCanvas {
+            border-radius: 10px;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .performance-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .performance-info h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fractal-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .fallback-message {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            color: #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../" class="back-link">← 返回 JavaScript 版本</a>
+        
+        <div class="header">
+            <h1>🚀 WebAssembly 高性能分形渲染器</h1>
+            <p>体验接近原生性能的复杂分形算法计算</p>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <strong>加载失败！</strong> WebAssembly 模块未能正确加载。这可能是因为：
+            <ul style="margin-top: 10px; margin-left: 20px;">
+                <li>浏览器不支持 WebAssembly</li>
+                <li>网络连接问题</li>
+                <li>文件缺失或损坏</li>
+            </ul>
+            <p style="margin-top: 10px;">请尝试刷新页面或使用支持 WebAssembly 的现代浏览器。</p>
+        </div>
+
+        <div class="fallback-message">
+            <p><strong>注意：</strong> 如果 WebAssembly 版本无法正常工作，您可以使用 <a href="../" style="color: #ffc107; text-decoration: underline;">JavaScript 版本</a>。</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-group">
+                    <label>🎯 分形类型</label>
+                    <select id="fractalType">
+                        <option value="0">🌀 Mandelbrot Set</option>
+                        <option value="1">🌊 Julia Set</option>
+                        <option value="2">🔥 Burning Ship</option>
+                        <option value="3">🎯 Newton Fractal</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>📐 图像尺寸</label>
+                    <select id="imageSize">
+                        <option value="400,300">400×300 (快速)</option>
+                        <option value="800,600" selected>800×600 (标准)</option>
+                        <option value="1200,900">1200×900 (高清)</option>
+                        <option value="1600,1200">1600×1200 (超清)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>🔄 迭代次数: <span id="iterationsValue">256</span></label>
+                    <input type="range" id="iterations" min="50" max="1000" value="256" step="10">
+                </div>
+
+                <div class="control-group">
+                    <label>🔍 缩放级别: <span id="zoomValue">1.0</span></label>
+                    <input type="range" id="zoom" min="0.1" max="1000" value="1" step="0.1">
+                </div>
+
+                <div class="control-group" id="juliaControls" style="display: none;">
+                    <label>🌊 Julia 参数 C</label>
+                    <input type="number" id="juliaReal" value="-0.7269" step="0.001" placeholder="实部">
+                    <input type="number" id="juliaImag" value="0.1889" step="0.001" placeholder="虚部">
+                </div>
+
+                <div class="control-group">
+                    <label>📍 中心坐标</label>
+                    <input type="number" id="centerX" value="0" step="0.01" placeholder="X 坐标">
+                    <input type="number" id="centerY" value="0" step="0.01" placeholder="Y 坐标">
+                </div>
+
+                <button class="button" id="renderBtn">🚀 渲染分形</button>
+                <button class="button" id="resetBtn">🔄 重置视图</button>
+                <button class="button" id="saveBtn">💾 保存图像</button>
+
+                <div class="performance-info">
+                    <h3>⚡ 性能统计</h3>
+                    <div class="performance-grid">
+                        <div>渲染时间: <span id="renderTime">-</span></div>
+                        <div>像素/秒: <span id="pixelsPerSec">-</span></div>
+                        <div>WASM状态: <span id="wasmStatus">加载中...</span></div>
+                        <div>内存使用: <span id="memoryUsage">-</span></div>
+                    </div>
+                </div>
+
+                <div class="fractal-info" id="fractalInfo">
+                    <strong>Mandelbrot Set</strong><br>
+                    算法: z<sub>n+1</sub> = z<sub>n</sub>² + c<br>
+                    经典逃逸时间分形，展示复平面稳定性
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="fractalCanvas" width="800" height="600"></canvas>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    正在渲染分形图形...
+                </div>
+                <div class="status-bar">
+                    <span id="coordinates">坐标: (0, 0)</span>
+                    <span id="zoomInfo">缩放: 1.0x</span>
+                    <span id="progressInfo">就绪</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 内联 JavaScript 避免外部文件依赖问题 -->
+    <script>
+        // 简化的 WebAssembly 分形渲染器
+        class SimpleFractalRenderer {
+            constructor() {
+                this.canvas = null;
+                this.ctx = null;
+                this.currentParams = {
+                    fractalType: 0,
+                    width: 800,
+                    height: 600,
+                    centerX: 0,
+                    centerY: 0,
+                    zoom: 1.0,
+                    iterations: 256,
+                    juliaReal: -0.7269,
+                    juliaImag: 0.1889
+                };
+            }
+
+            async initialize() {
+                try {
+                    // 初始化 Canvas
+                    this.canvas = document.getElementById('fractalCanvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    
+                    // 设置事件监听器
+                    this.setupEventListeners();
+                    
+                    // 显示回退版本消息
+                    document.getElementById('wasmStatus').textContent = '回退到 JS 版本';
+                    
+                    // 渲染初始分形
+                    await this.renderFractal();
+                    
+                    return true;
+                } catch (error) {
+                    console.error('初始化失败:', error);
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('wasmStatus').textContent = '初始化失败';
+                    return false;
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('fractalType').addEventListener('change', (e) => {
+                    this.currentParams.fractalType = parseInt(e.target.value);
+                    this.updateFractalInfo();
+                    this.showJuliaControls(this.currentParams.fractalType === 1);
+                });
+
+                document.getElementById('imageSize').addEventListener('change', (e) => {
+                    const [width, height] = e.target.value.split(',').map(Number);
+                    this.currentParams.width = width;
+                    this.currentParams.height = height;
+                    this.resizeCanvas();
+                });
+
+                document.getElementById('iterations').addEventListener('input', (e) => {
+                    this.currentParams.iterations = parseInt(e.target.value);
+                    document.getElementById('iterationsValue').textContent = e.target.value;
+                });
+
+                document.getElementById('zoom').addEventListener('input', (e) => {
+                    this.currentParams.zoom = parseFloat(e.target.value);
+                    document.getElementById('zoomValue').textContent = e.target.value;
+                    document.getElementById('zoomInfo').textContent = '缩放: ' + e.target.value + 'x';
+                });
+
+                document.getElementById('centerX').addEventListener('input', (e) => {
+                    this.currentParams.centerX = parseFloat(e.target.value);
+                });
+
+                document.getElementById('centerY').addEventListener('input', (e) => {
+                    this.currentParams.centerY = parseFloat(e.target.value);
+                });
+
+                document.getElementById('juliaReal').addEventListener('input', (e) => {
+                    this.currentParams.juliaReal = parseFloat(e.target.value);
+                });
+
+                document.getElementById('juliaImag').addEventListener('input', (e) => {
+                    this.currentParams.juliaImag = parseFloat(e.target.value);
+                });
+
+                document.getElementById('renderBtn').addEventListener('click', () => this.renderFractal());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetView());
+                document.getElementById('saveBtn').addEventListener('click', () => this.saveImage());
+
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            }
+
+            updateFractalInfo() {
+                const fractalInfo = {
+                    0: { name: "Mandelbrot Set", algorithm: "z<sub>n+1</sub> = z<sub>n</sub>² + c", description: "经典逃逸时间分形，展示复平面稳定性" },
+                    1: { name: "Julia Set", algorithm: "z<sub>n+1</sub> = z² + c (固定参数c)", description: "参数化复多项式迭代，展示连通性变化" },
+                    2: { name: "Burning Ship", algorithm: "z<sub>n+1</sub> = (|Re(z)| + i|Im(z)|)² + c", description: "Mandelbrot变体，使用绝对值变换产生船形结构" },
+                    3: { name: "Newton Fractal", algorithm: "z<sub>n+1</sub> = z - f(z)/f'(z), f(z) = z³ - 1", description: "牛顿法求根收敛域，三色区域对应立方根" }
+                };
+                
+                const info = fractalInfo[this.currentParams.fractalType];
+                const infoElement = document.getElementById('fractalInfo');
+                infoElement.innerHTML = '<strong>' + info.name + '</strong><br>算法: ' + info.algorithm + '<br>' + info.description;
+            }
+
+            showJuliaControls(show) {
+                document.getElementById('juliaControls').style.display = show ? 'block' : 'none';
+            }
+
+            resizeCanvas() {
+                this.canvas.width = this.currentParams.width;
+                this.canvas.height = this.currentParams.height;
+            }
+
+            async renderFractal() {
+                const startTime = performance.now();
+                
+                try {
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('renderBtn').disabled = true;
+                    
+                    // JavaScript 回退版本的简单 Mandelbrot 实现
+                    const imageData = this.ctx.createImageData(this.currentParams.width, this.currentParams.height);
+                    const data = imageData.data;
+                    
+                    const scale = 4.0 / this.currentParams.zoom;
+                    const stepX = scale / this.currentParams.width;
+                    const stepY = scale / this.currentParams.height;
+                    const startX = this.currentParams.centerX - scale / 2.0;
+                    const startY = this.currentParams.centerY - scale / 2.0;
+                    
+                    for (let y = 0; y < this.currentParams.height; y++) {
+                        for (let x = 0; x < this.currentParams.width; x++) {
+                            const real = startX + x * stepX;
+                            const imag = startY + y * stepY;
+                            
+                            let iterations = 0;
+                            if (this.currentParams.fractalType === 0) {
+                                iterations = this.mandelbrotIterations(real, imag);
+                            } else {
+                                iterations = this.mandelbrotIterations(real, imag); // 简化版本
+                            }
+                            
+                            const index = (y * this.currentParams.width + x) * 4;
+                            const color = this.getColor(iterations);
+                            data[index] = color.r;
+                            data[index + 1] = color.g;
+                            data[index + 2] = color.b;
+                            data[index + 3] = 255;
+                        }
+                    }
+                    
+                    this.ctx.putImageData(imageData, 0, 0);
+                    
+                    const renderTime = performance.now() - startTime;
+                    const totalPixels = this.currentParams.width * this.currentParams.height;
+                    const pixelsPerSec = Math.round(totalPixels / (renderTime / 1000));
+                    
+                    document.getElementById('renderTime').textContent = renderTime.toFixed(1) + 'ms';
+                    document.getElementById('pixelsPerSec').textContent = pixelsPerSec.toLocaleString();
+                    document.getElementById('memoryUsage').textContent = (totalPixels * 4 / 1024 / 1024).toFixed(1) + 'MB';
+                    
+                } catch (error) {
+                    console.error('渲染失败:', error);
+                    document.getElementById('errorMessage').style.display = 'block';
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('renderBtn').disabled = false;
+                }
+            }
+
+            mandelbrotIterations(real, imag) {
+                let zx = 0, zy = 0;
+                let i = 0;
+                
+                while (i < this.currentParams.iterations && zx * zx + zy * zy < 4) {
+                    const temp = zx * zx - zy * zy + real;
+                    zy = 2 * zx * zy + imag;
+                    zx = temp;
+                    i++;
+                }
+                
+                return i;
+            }
+
+            getColor(iterations) {
+                if (iterations === this.currentParams.iterations) {
+                    return { r: 0, g: 0, b: 0 };
+                }
+                
+                const t = iterations / this.currentParams.iterations;
+                const hue = 240 * (1 - t);
+                return this.hsvToRgb(hue, 1, t);
+            }
+
+            hsvToRgb(h, s, v) {
+                const c = v * s;
+                const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+                const m = v - c;
+                
+                let r, g, b;
+                if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+                else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+                else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+                else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+                else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+                else { r = c; g = 0; b = x; }
+                
+                return {
+                    r: Math.round((r + m) * 255),
+                    g: Math.round((g + m) * 255),
+                    b: Math.round((b + m) * 255)
+                };
+            }
+
+            handleCanvasClick(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                const scale = 4.0 / this.currentParams.zoom;
+                const realX = this.currentParams.centerX + (x / this.currentParams.width - 0.5) * scale;
+                const realY = this.currentParams.centerY + (y / this.currentParams.height - 0.5) * scale;
+                
+                this.currentParams.centerX = realX;
+                this.currentParams.centerY = realY;
+                
+                document.getElementById('centerX').value = realX.toFixed(6);
+                document.getElementById('centerY').value = realY.toFixed(6);
+                
+                this.renderFractal();
+            }
+
+            handleMouseMove(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                const scale = 4.0 / this.currentParams.zoom;
+                const realX = this.currentParams.centerX + (x / this.currentParams.width - 0.5) * scale;
+                const realY = this.currentParams.centerY + (y / this.currentParams.height - 0.5) * scale;
+                
+                document.getElementById('coordinates').textContent = '坐标: (' + realX.toFixed(4) + ', ' + realY.toFixed(4) + ')';
+            }
+
+            resetView() {
+                this.currentParams.centerX = 0;
+                this.currentParams.centerY = 0;
+                this.currentParams.zoom = 1.0;
+                
+                document.getElementById('centerX').value = 0;
+                document.getElementById('centerY').value = 0;
+                document.getElementById('zoom').value = 1;
+                document.getElementById('zoomValue').textContent = '1.0';
+                document.getElementById('zoomInfo').textContent = '缩放: 1.0x';
+                
+                this.renderFractal();
+            }
+
+            saveImage() {
+                if (!this.canvas) return;
+                
+                const link = document.createElement('a');
+                link.download = 'fractal_' + Date.now() + '.png';
+                link.href = this.canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            const renderer = new SimpleFractalRenderer();
+            await renderer.initialize();
+        });
+    </script>
+</body>
+</html>

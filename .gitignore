@@ -175,3 +175,19 @@ config/user_settings.ini
 # 大型测试数据
 test_data/large_datasets/
 benchmarks/performance_data/
+
+# =============================================================================
+# WebAssembly 相关 (确保部署文件被跟踪)
+# =============================================================================
+# 保留 WebAssembly 编译产物用于部署
+!docs/*.wasm
+!docs/*.js
+!docs/*.html
+!web-wasm/*.wasm
+!web-wasm/*.js
+!web-wasm/*.html
+
+# 但忽略构建过程中的临时文件
+wasm/build/
+*.o.wasm
+*.bc
