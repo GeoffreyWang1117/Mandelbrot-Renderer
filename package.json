@@ -1,0 +1,52 @@
+{
+  "name": "mandelbrot-renderer",
+  "version": "2.0.0",
+  "description": "High-performance fractal rendering engine with multiple parallel computing implementations",
+  "main": "web/mandelbrot.js",
+  "scripts": {
+    "dev": "npx http-server ./web -p 8080 -o",
+    "dev:docs": "npx http-server ./docs -p 8080 -o",
+    "test": "echo \"Test framework to be implemented\" && exit 0",
+    "lint": "eslint web/*.js docs/*.js --ignore-pattern '*.min.js'",
+    "format": "prettier --write \"web/**/*.{js,html,css}\" \"docs/**/*.{js,html,css}\"",
+    "format:check": "prettier --check \"web/**/*.{js,html,css}\" \"docs/**/*.{js,html,css}\"",
+    "build:wasm": "cd wasm && bash build.sh",
+    "deploy": "echo \"Deployed via GitHub Actions\"",
+    "benchmark": "node scripts/benchmark.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeoffreyWang1117/Mandelbrot-Renderer.git"
+  },
+  "keywords": [
+    "fractal",
+    "mandelbrot",
+    "julia-set",
+    "burning-ship",
+    "newton-fractal",
+    "webassembly",
+    "cuda",
+    "openmp",
+    "parallel-computing",
+    "gpu-computing",
+    "visualization",
+    "mathematics",
+    "computational-art",
+    "performance"
+  ],
+  "author": "Geoffrey Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GeoffreyWang1117/Mandelbrot-Renderer/issues"
+  },
+  "homepage": "https://geoffreywang1117.github.io/Mandelbrot-Renderer/",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

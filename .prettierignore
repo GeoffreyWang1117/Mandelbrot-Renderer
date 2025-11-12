@@ -1,0 +1,30 @@
+# Ignore build outputs
+build/
+output/
+*.ppm
+*.png
+*.jpg
+
+# Ignore WASM outputs
+*.wasm
+*.js.mem
+
+# Ignore dependencies
+node_modules/
+
+# Ignore git
+.git/
+
+# Ignore compiled files
+*.o
+*.out
+*.exe
+mandelbrot_cpu
+mandelbrot_omp
+mandelbrot_cuda
+
+# Ignore specific generated files
+docs/fractals.js
+docs/fractals.wasm
+wasm/web/fractals.js
+wasm/web/fractals.wasm

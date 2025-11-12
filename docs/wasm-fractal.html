@@ -441,16 +441,35 @@
             async tryLoadWasm() {
                 try {
                     this.updateStatus("正在尝试加载 WebAssembly...");
-                    
+
                     // 检查 WebAssembly 支持
                     if (typeof WebAssembly === 'undefined') {
                         throw new Error('浏览器不支持 WebAssembly');
                     }
-                    
-                    // 这里应该加载真实的 WASM 模块，但现在我们模拟失败
-                    // 在实际部署中，需要正确的 .wasm 文件和加载器
-                    throw new Error('WebAssembly 文件不可用（本地测试）');
-                    
+
+                    // 加载 WASM 模块
+                    const wasmPath = 'fractals.wasm';
+                    const response = await fetch(wasmPath);
+
+                    if (!response.ok) {
+                        throw new Error(`无法加载 WASM 文件: ${response.status}`);
+                    }
+
+                    const wasmBuffer = await response.arrayBuffer();
+                    const wasmModule = await WebAssembly.compile(wasmBuffer);
+                    const wasmInstance = await WebAssembly.instantiate(wasmModule, {
+                        env: {
+                            memory: new WebAssembly.Memory({ initial: 256, maximum: 512 })
+                        }
+                    });
+
+                    this.wasmModule = wasmInstance.exports;
+                    this.useWasm = true;
+                    document.getElementById('wasmStatus').textContent = 'WebAssembly 已启用';
+                    document.getElementById('successMessage').style.display = 'block';
+                    this.updateStatus("✅ WebAssembly 加载成功！");
+                    console.log('✅ WebAssembly 模块加载成功');
+
                 } catch (error) {
                     console.warn('WebAssembly 加载失败，使用 JavaScript 回退:', error.message);
                     this.useWasm = false;
@@ -567,6 +586,71 @@
                     this.isRendering = false;
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('renderBtn').disabled = false;
+                }
+            }
+
+            async renderWithWasm(data) {
+                const { width, height, centerX, centerY, zoom, iterations, fractalType, juliaReal, juliaImag } = this.currentParams;
+
+                const scale = 4.0 / zoom;
+                const stepX = scale / width;
+                const stepY = scale / height;
+                const startX = centerX - scale / 2.0;
+                const startY = centerY - scale / 2.0;
+
+                // 使用WASM模块的导出函数
+                const wasmFunctions = {
+                    0: 'mandelbrotIterations',
+                    1: 'juliaIterations',
+                    2: 'burningShipIterations',
+                    3: 'newtonIterations'
+                };
+
+                const funcName = wasmFunctions[fractalType];
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const real = startX + x * stepX;
+                        const imag = startY + y * stepY;
+
+                        let iterCount = 0;
+                        if (this.wasmModule && this.wasmModule[funcName]) {
+                            // 调用WASM函数
+                            if (fractalType === 1) { // Julia
+                                iterCount = this.wasmModule[funcName](real, imag, juliaReal, juliaImag, iterations);
+                            } else {
+                                iterCount = this.wasmModule[funcName](real, imag, iterations);
+                            }
+                        } else {
+                            // 回退到JavaScript
+                            switch (fractalType) {
+                                case 0:
+                                    iterCount = this.mandelbrotIterations(real, imag, iterations);
+                                    break;
+                                case 1:
+                                    iterCount = this.juliaIterations(real, imag, juliaReal, juliaImag, iterations);
+                                    break;
+                                case 2:
+                                    iterCount = this.burningShipIterations(real, imag, iterations);
+                                    break;
+                                case 3:
+                                    iterCount = this.newtonIterations(real, imag, iterations);
+                                    break;
+                            }
+                        }
+
+                        const color = this.getColor(iterCount, fractalType, iterations);
+                        const index = (y * width + x) * 4;
+                        data[index] = color.r;
+                        data[index + 1] = color.g;
+                        data[index + 2] = color.b;
+                        data[index + 3] = 255;
+                    }
+
+                    // 每隔几行让出控制权
+                    if (y % 10 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
                 }
             }
 

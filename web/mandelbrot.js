@@ -45,7 +45,10 @@ class FractalRenderer {
         // Initialize UI
         this.initializeUI();
         this.setupEventListeners();
-        
+
+        // Load state from URL if present
+        this.loadStateFromURL();
+
         // Initial render
         this.render();
     }
@@ -100,11 +103,19 @@ class FractalRenderer {
         document.getElementById('render-btn').addEventListener('click', () => this.render());
         document.getElementById('reset-btn').addEventListener('click', () => this.resetView());
         document.getElementById('save-btn').addEventListener('click', () => this.saveImage());
+        document.getElementById('share-btn').addEventListener('click', () => this.shareView());
         
         // Preset locations (update for current fractal)
         document.getElementById('classic-btn').addEventListener('click', () => this.loadPreset('classic'));
         document.getElementById('spiral-btn').addEventListener('click', () => this.loadPreset('spiral'));
         document.getElementById('seahorse-btn').addEventListener('click', () => this.loadPreset('seahorse'));
+        document.getElementById('elephant-btn').addEventListener('click', () => this.loadPreset('elephant'));
+        document.getElementById('galaxy-btn').addEventListener('click', () => this.loadPreset('galaxy'));
+        document.getElementById('lightning-btn').addEventListener('click', () => this.loadPreset('lightning'));
+
+        // Favorites
+        document.getElementById('save-favorite-btn').addEventListener('click', () => this.saveFavorite());
+        document.getElementById('manage-favorites-btn').addEventListener('click', () => this.manageFavorites());
     }
     
     handleCanvasClick(e) {
@@ -188,6 +199,88 @@ class FractalRenderer {
         link.href = this.canvas.toDataURL();
         link.click();
     }
+
+    // Share current view via URL
+    shareView() {
+        const params = new URLSearchParams();
+        params.set('fractal', this.fractalType);
+        params.set('cx', this.centerX.toFixed(10));
+        params.set('cy', this.centerY.toFixed(10));
+        params.set('zoom', this.zoom.toString());
+        params.set('iter', this.maxIterations.toString());
+
+        if (this.fractalType === 'julia') {
+            params.set('jx', this.juliaC.x.toFixed(10));
+            params.set('jy', this.juliaC.y.toFixed(10));
+        }
+
+        const shareURL = window.location.origin + window.location.pathname + '?' + params.toString();
+
+        // Copy to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareURL).then(() => {
+                alert('🔗 Share link copied to clipboard!\n\nAnyone with this link can view your exact fractal view.');
+            }).catch(() => {
+                // Fallback for clipboard failure
+                this.showShareDialog(shareURL);
+            });
+        } else {
+            this.showShareDialog(shareURL);
+        }
+
+        // Also update browser URL without reload
+        window.history.replaceState({}, '', shareURL);
+    }
+
+    // Show share dialog fallback
+    showShareDialog(url) {
+        const message = `Share this link:\n\n${url}`;
+        alert(message);
+    }
+
+    // Load fractal state from URL parameters
+    loadStateFromURL() {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.has('fractal')) {
+            this.fractalType = params.get('fractal');
+            document.getElementById('fractal-type').value = this.fractalType;
+            this.updateFractalControls();
+        }
+
+        if (params.has('cx')) {
+            this.centerX = parseFloat(params.get('cx'));
+        }
+
+        if (params.has('cy')) {
+            this.centerY = parseFloat(params.get('cy'));
+        }
+
+        if (params.has('zoom')) {
+            this.zoom = parseFloat(params.get('zoom'));
+            document.getElementById('zoom').value = this.zoom;
+            document.getElementById('zoom-value').textContent = this.zoom.toFixed(1) + 'x';
+        }
+
+        if (params.has('iter')) {
+            this.maxIterations = parseInt(params.get('iter'));
+            document.getElementById('iterations').value = this.maxIterations;
+            document.getElementById('iterations-value').textContent = this.maxIterations.toString();
+        }
+
+        if (this.fractalType === 'julia') {
+            if (params.has('jx')) {
+                this.juliaC.x = parseFloat(params.get('jx'));
+                document.getElementById('julia-cx').value = this.juliaC.x;
+                document.getElementById('julia-cx-value').textContent = this.juliaC.x.toFixed(4);
+            }
+            if (params.has('jy')) {
+                this.juliaC.y = parseFloat(params.get('jy'));
+                document.getElementById('julia-cy').value = this.juliaC.y;
+                document.getElementById('julia-cy-value').textContent = this.juliaC.y.toFixed(4);
+            }
+        }
+    }
     
     // Update UI controls based on fractal type
     updateFractalControls() {
@@ -229,9 +322,23 @@ class FractalRenderer {
                     break;
                 case 'spiral':
                     this.centerX = -0.7269; this.centerY = 0.1889; this.zoom = 100;
+                    this.maxIterations = 256;
                     break;
                 case 'seahorse':
                     this.centerX = -0.7453; this.centerY = 0.1127; this.zoom = 200;
+                    this.maxIterations = 256;
+                    break;
+                case 'elephant':
+                    this.centerX = 0.28693186889504513; this.centerY = 0.014286693904085048;
+                    this.zoom = 300; this.maxIterations = 512;
+                    break;
+                case 'galaxy':
+                    this.centerX = -0.7; this.centerY = 0.0; this.zoom = 50;
+                    this.maxIterations = 256;
+                    break;
+                case 'lightning':
+                    this.centerX = -0.16; this.centerY = 1.0405; this.zoom = 150;
+                    this.maxIterations = 256;
                     break;
             }
         } else if (this.fractalType === 'julia') {
@@ -246,6 +353,18 @@ class FractalRenderer {
                     break;
                 case 'seahorse':
                     this.juliaC.x = 0.285; this.juliaC.y = 0.01;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'elephant':
+                    this.juliaC.x = 0.3; this.juliaC.y = 0.5;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'galaxy':
+                    this.juliaC.x = -0.8; this.juliaC.y = 0.156;
+                    this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
+                    break;
+                case 'lightning':
+                    this.juliaC.x = -0.70176; this.juliaC.y = -0.3842;
                     this.centerX = 0.0; this.centerY = 0.0; this.zoom = 1.0;
                     break;
             }
@@ -265,6 +384,18 @@ class FractalRenderer {
                 case 'seahorse':
                     this.centerX = -1.775; this.centerY = -0.01; this.zoom = 500;
                     break;
+                case 'elephant':
+                    this.centerX = -1.74; this.centerY = -0.028; this.zoom = 200;
+                    this.maxIterations = 256;
+                    break;
+                case 'galaxy':
+                    this.centerX = -1.65; this.centerY = -0.035; this.zoom = 80;
+                    this.maxIterations = 256;
+                    break;
+                case 'lightning':
+                    this.centerX = -1.72; this.centerY = -0.025; this.zoom = 150;
+                    this.maxIterations = 256;
+                    break;
             }
         } else if (this.fractalType === 'newton') {
             switch(preset) {
@@ -277,13 +408,132 @@ class FractalRenderer {
                 case 'seahorse':
                     this.centerX = 0.5; this.centerY = 0.866; this.zoom = 20.0;
                     break;
+                case 'elephant':
+                    this.centerX = 1.0; this.centerY = 0.0; this.zoom = 15.0;
+                    this.maxIterations = 100;
+                    break;
+                case 'galaxy':
+                    this.centerX = 0.0; this.centerY = 1.0; this.zoom = 8.0;
+                    this.maxIterations = 100;
+                    break;
+                case 'lightning':
+                    this.centerX = 0.866; this.centerY = 0.5; this.zoom = 25.0;
+                    this.maxIterations = 150;
+                    break;
             }
         }
         
-        // Update zoom slider
+        // Update UI sliders
         document.getElementById('zoom').value = this.zoom;
         document.getElementById('zoom-value').textContent = this.zoom.toFixed(1) + 'x';
-        
+        document.getElementById('iterations').value = this.maxIterations;
+        document.getElementById('iterations-value').textContent = this.maxIterations.toString();
+
+        this.render();
+    }
+
+    // Save current view as favorite
+    saveFavorite() {
+        const name = prompt('Enter a name for this favorite view:');
+        if (!name) return;
+
+        const favorite = {
+            name: name,
+            fractalType: this.fractalType,
+            centerX: this.centerX,
+            centerY: this.centerY,
+            zoom: this.zoom,
+            maxIterations: this.maxIterations,
+            juliaC: { ...this.juliaC },
+            timestamp: Date.now()
+        };
+
+        // Get existing favorites from localStorage
+        let favorites = JSON.parse(localStorage.getItem('fractal-favorites') || '[]');
+        favorites.push(favorite);
+
+        // Limit to 20 favorites
+        if (favorites.length > 20) {
+            favorites = favorites.slice(-20);
+        }
+
+        localStorage.setItem('fractal-favorites', JSON.stringify(favorites));
+        alert('⭐ Favorite saved successfully!\n\nName: ' + name);
+    }
+
+    // Manage favorites dialog
+    manageFavorites() {
+        const favorites = JSON.parse(localStorage.getItem('fractal-favorites') || '[]');
+
+        if (favorites.length === 0) {
+            alert('📋 No favorites saved yet!\n\nClick "⭐ Save Favorite" to save interesting views.');
+            return;
+        }
+
+        let message = '📋 Your Saved Favorites:\n\n';
+        favorites.forEach((fav, index) => {
+            const date = new Date(fav.timestamp).toLocaleDateString();
+            message += `${index + 1}. ${fav.name} (${fav.fractalType}) - ${date}\n`;
+        });
+        message += '\nEnter a number to load, or "delete X" to remove (e.g., "delete 2"), or "clear" to remove all:';
+
+        const input = prompt(message);
+        if (!input) return;
+
+        if (input.toLowerCase() === 'clear') {
+            if (confirm('Are you sure you want to delete ALL favorites?')) {
+                localStorage.removeItem('fractal-favorites');
+                alert('🗑️ All favorites cleared!');
+            }
+            return;
+        }
+
+        if (input.toLowerCase().startsWith('delete ')) {
+            const indexToDelete = parseInt(input.substring(7)) - 1;
+            if (indexToDelete >= 0 && indexToDelete < favorites.length) {
+                const deleted = favorites.splice(indexToDelete, 1)[0];
+                localStorage.setItem('fractal-favorites', JSON.stringify(favorites));
+                alert(`🗑️ Deleted: ${deleted.name}`);
+                this.manageFavorites(); // Reopen dialog
+            } else {
+                alert('❌ Invalid favorite number!');
+            }
+            return;
+        }
+
+        const index = parseInt(input) - 1;
+        if (index >= 0 && index < favorites.length) {
+            this.loadFavorite(favorites[index]);
+        } else {
+            alert('❌ Invalid favorite number!');
+        }
+    }
+
+    // Load a favorite view
+    loadFavorite(favorite) {
+        this.fractalType = favorite.fractalType;
+        this.centerX = favorite.centerX;
+        this.centerY = favorite.centerY;
+        this.zoom = favorite.zoom;
+        this.maxIterations = favorite.maxIterations;
+        this.juliaC = { ...favorite.juliaC };
+
+        // Update UI
+        document.getElementById('fractal-type').value = this.fractalType;
+        this.updateFractalControls();
+        document.getElementById('zoom').value = this.zoom;
+        document.getElementById('zoom-value').textContent = this.zoom.toFixed(1) + 'x';
+        document.getElementById('iterations').value = this.maxIterations;
+        document.getElementById('iterations-value').textContent = this.maxIterations.toString();
+
+        if (this.fractalType === 'julia') {
+            document.getElementById('julia-cx').value = this.juliaC.x;
+            document.getElementById('julia-cx-value').textContent = this.juliaC.x.toFixed(4);
+            document.getElementById('julia-cy').value = this.juliaC.y;
+            document.getElementById('julia-cy-value').textContent = this.juliaC.y.toFixed(4);
+        }
+
+        alert(`✅ Loaded favorite: ${favorite.name}`);
         this.render();
     }
     
