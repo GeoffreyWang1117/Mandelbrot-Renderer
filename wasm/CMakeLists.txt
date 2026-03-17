@@ -21,7 +21,7 @@ add_executable(fractals ${SOURCES})
 # Emscripten 特定设置
 set_target_properties(fractals PROPERTIES
     SUFFIX ".js"
-    LINK_FLAGS "-s WASM=1 -s EXPORTED_RUNTIME_METHODS=['cwrap','ccall','HEAPU8'] -s MODULARIZE=1 -s EXPORT_NAME='FractalsModule' -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=2GB -s EXPORTED_FUNCTIONS=['_malloc','_free','_testFunction','_mandelbrotIterations','_juliaIterations','_burningShipIterations','_newtonIterations','_computeFractalBatch','_renderFractalImage'] -O3 -s ASSERTIONS=1 --bind"
+    LINK_FLAGS "-s WASM=1 -s EXPORTED_RUNTIME_METHODS=['cwrap','ccall','HEAPU8'] -s MODULARIZE=1 -s EXPORT_NAME='FractalsModule' -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=2GB -s EXPORTED_FUNCTIONS=['_malloc','_free','_testFunction','_mandelbrotIterations','_juliaIterations','_burningShipIterations','_newtonIterations','_tricornIterations','_phoenixIterations','_computeFractalBatch','_renderFractalImage'] -O3 -s ASSERTIONS=1 --bind"
 )
 
 # 优化设置

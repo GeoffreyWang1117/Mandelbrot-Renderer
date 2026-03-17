@@ -1,0 +1,16 @@
+{
+  "name": "fractal-renderer-server",
+  "version": "1.0.0",
+  "description": "Backend API server for Fractal Renderer with server-side rendering support",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "sharp": "^0.33.2"
+  }
+}

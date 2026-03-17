@@ -10,9 +10,10 @@ cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
+build/Makefile
 *.cmake
 !CMakeLists.txt
+!Makefile
 
 # =============================================================================
 # 编译产物
@@ -155,6 +156,9 @@ doc/man/
 # =============================================================================
 # 包管理
 # =============================================================================
+# Node modules
+node_modules/
+
 # Conan
 conandata.yml
 conaninfo.txt

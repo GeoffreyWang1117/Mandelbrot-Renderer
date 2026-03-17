@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+.github
+
+# Build artifacts
+build/
+output/
+wasm/build/
+
+# Node modules (reinstalled in Docker)
+node_modules/
+server/node_modules/
+
+# Development files
+web/
+web-wasm/
+*.md
+!server/package.json
+LICENSE
+CHANGELOG.md
+CONTRIBUTING.md
+PERFORMANCE_REPORT.md
+UPGRADE_SUMMARY.md
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude
+.claude/
+
+# Test files
+test-wasm-local.sh
+quickstart.sh
+scripts/
+
+# Docker files (not needed inside image)
+Dockerfile
+Dockerfile.api
+docker-compose*.yml
+.dockerignore

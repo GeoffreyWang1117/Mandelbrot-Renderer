@@ -161,9 +161,18 @@ endif()
 option(ENABLE_ALL "Enable all rendering modes" OFF)
 
 # =============================================================================
+# Server-side API binary (for EC2/Docker deployment)
+# =============================================================================
+add_executable(fractal_api
+    src/render_api.cpp
+)
+
+target_compile_definitions(fractal_api PRIVATE API_VERSION)
+
+# =============================================================================
 # 安装配置
 # =============================================================================
-install(TARGETS mandelbrot_cpu
+install(TARGETS mandelbrot_cpu fractal_api
     RUNTIME DESTINATION bin
 )
 

@@ -1,0 +1,31 @@
+# Production compose — uses pre-built images from GHCR
+# No build step needed on EC2. Just: docker compose -f docker-compose.prod.yml up -d
+#
+# Before first use, log in to GHCR:
+#   echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_USERNAME --password-stdin
+#
+# Replace OWNER below with your GitHub username (e.g. geoffreywang1117)
+
+services:
+  web:
+    image: ghcr.io/geoffreywang1117/fractal-web:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+
+  api:
+    image: ghcr.io/geoffreywang1117/fractal-api:latest
+    environment:
+      - PORT=3000
+      - FRACTAL_BIN=/usr/local/bin/fractal_api
+      - NODE_ENV=production
+      - MAX_RENDERS=2
+    expose:
+      - "3000"
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.5

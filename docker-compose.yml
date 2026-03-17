@@ -1,0 +1,30 @@
+services:
+  # Nginx - static file server + reverse proxy
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docs:/var/www/fractal:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+
+  # Node.js API server + C++ renderer
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      - PORT=3000
+      - FRACTAL_BIN=/usr/local/bin/fractal_api
+      - NODE_ENV=production
+      - MAX_RENDERS=2
+    expose:
+      - "3000"
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.5
