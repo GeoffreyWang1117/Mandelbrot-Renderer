@@ -2,7 +2,7 @@
   "name": "mandelbrot-renderer",
   "version": "2.0.0",
   "description": "High-performance fractal rendering engine with multiple parallel computing implementations",
-  "main": "web/mandelbrot.js",
+  "main": "docs/mandelbrot.js",
   "scripts": {
     "dev": "npx http-server ./docs -p 8080 -o",
     "dev:api": "cd server && node index.js",
